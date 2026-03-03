@@ -58,8 +58,17 @@ function showAllTodos() {
         const fileName = filePath.split('/').pop();
 
         const todos = lines
-            .map((line, index) => ({line, index: index + 1}))
-            .filter(item => item.line.includes('TODO'));
+        .map((line, index) => {
+        const todoIndex = line.indexOf('TODO');
+        if (todoIndex !== -1) {
+            return {
+                line: line.substring(todoIndex).trim(),
+                index: index + 1
+            };
+        }
+        return null;
+    })
+    .filter(item => item !== null);
 
         if (todos.length > 0) {
             console.log(`${fileName}:`);
