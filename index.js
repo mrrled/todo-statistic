@@ -16,6 +16,9 @@ function processCommand(command) {
         case 'exit':
             process.exit(0);
             break;
+        case 'important':
+            console.log(important());
+            break;
         default:
             console.log('wrong command');
             break;
@@ -24,7 +27,7 @@ function processCommand(command) {
 
 // TODO you can do it!
 function show() {
-    const files = getFiles().map(file => file.split('\n'));
+    const files = getFiles().map(file => file.split('\r\n'));
     const result = [];
     for (const file of files) {
         for (const line of file) {
@@ -32,6 +35,18 @@ function show() {
             if (indexStart !== -1) {
                 result.push(line.substring(indexStart));
             }
+        }
+    }
+    return result;
+}
+
+function important() {
+    const lines = show();
+    const result = [];
+    for (const line of lines) {
+        const startIndex = line.indexOf('!');
+        if (startIndex !== -1) {
+            result.push(line);
         }
     }
     return result;
