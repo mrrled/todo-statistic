@@ -129,36 +129,61 @@ function parseTodo(line)
 function sortByImportance() {
     const todos = show().map(parseTodo);
     todos.sort((a, b) => b.exclamations - a.exclamations);
-    todos.forEach(t => console.log(t.text));
+    for (const t of todos) {
+        console.log(t.text);
+    }
 }
 
 function sortByUser() {
     const todos = show().map(parseTodo);
     const withUser = {}, without = [];
-
-    todos.forEach(t => {
-        if (t.user) (withUser[t.user.toLowerCase()] = withUser[t.user.toLowerCase()] || []).push(t);
-        else without.push(t);
-    });
     
-    Object.keys(withUser).sort().forEach(user => {
+    for (const t of todos) {
+        if (t.user) {
+            if (!withUser[t.user]) withUser[t.user] = [];
+            withUser[t.user].push(t);
+        } else {
+            without.push(t);
+        }
+    }
+    
+    const sortedUsers = Object.keys(withUser).sort();
+    for (const user of sortedUsers) {
         console.log(`\n${user}:`);
-        withUser[user].forEach(t => console.log(t.text));
-    });
+        for (const t of withUser[user]) {
+            console.log(t.text);
+        }
+    }
     
     if (without.length) {
         console.log('\nБез пользователя:');
-        without.forEach(t => console.log(t.text));
+        for (const t of without) {
+            console.log(t.text);
+        }
     }
 }
 
 function sortByDate() {
     const todos = show().map(parseTodo);
-    const withDate = todos.filter(t => t.date).sort((a, b) => b.date.localeCompare(a.date));
-    const withoutDate = todos.filter(t => !t.date);
+    const withDate = [];
+    const withoutDate = [];
+
+    for (const t of todos) {
+        if (t.date) {
+            withDate.push(t);
+        } else {
+            withoutDate.push(t);
+        }
+    }
     
-    withDate.forEach(t => console.log(`[${t.date}] ${t.text}`));
-    withoutDate.forEach(t => console.log(t.text));
+    withDate.sort((a, b) => b.date.localeCompare(a.date));
+
+    for (const t of withDate) {
+        console.log(`[${t.date}] ${t.text}`);
+    }
+    for (const t of withoutDate) {
+        console.log(t.text);
+    }
 }
 function user(username) {
     const lowerUsername = username.toLowerCase();
