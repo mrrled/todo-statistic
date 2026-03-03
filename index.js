@@ -12,7 +12,7 @@ function getFiles() {
 }
 
 function processCommand(command) {
-    const args = command.split(' ')[1];
+    const args = command.split(' ').slice(1).join(' ');
     const com = command.split(' ')[0];
     switch (com) {
         case 'exit':
@@ -43,24 +43,24 @@ function showAllTodos() {
 
     let totalTodos = 0;
 
-    filePaths.forEach(filePath => {
+    for (const filePath of filePaths) {
         const content = readFile(filePath);
         const lines = content.split('\n');
         const fileName = filePath.split('/').pop();
 
         const todos = lines
-            .map((line, index) => ({ line, index: index + 1 }))
+            .map((line, index) => ({line, index: index + 1}))
             .filter(item => item.line.includes('TODO'));
 
         if (todos.length > 0) {
             console.log(`${fileName}:`);
-            todos.forEach(todo => {
+            for (const todo of todos) {
                 console.log(`   [строка ${todo.index}] ${todo.line.trim()}`);
                 totalTodos++;
-            });
+            }
             console.log('');
         }
-    });
+    }
 
     if (totalTodos === 0) {
         console.log('TODO комментарии не найдены');
@@ -72,9 +72,9 @@ function showAllTodos() {
 
 // TODO you can do it!
 function show() {
-    const files = getFiles().map(file => file.split('\r\n'));
+    const operatedFiles = files.map(file => file.split('\r\n'));
     const result = [];
-    for (const file of files) {
+    for (const file of operatedFiles) {
         for (const line of file) {
             const indexStart = line.indexOf('// TODO ');
             if (indexStart !== -1) {
@@ -107,7 +107,7 @@ function user(username) {
     return ans;
 }
 
-function getNameMatch(){
+function getNameMatch() {
     const lines = show();
     const nameMatch = new Map();
     for (const line of lines) {
@@ -115,13 +115,14 @@ function getNameMatch(){
         if (parts.length !== 3) {
             continue;
         }
-        const name = parts[0].split(' ')[2].toLowerCase();
+        const name = parts[0].split(' ').slice(2).join(' ').toLowerCase();
         if (nameMatch.has(name)) {
             const arr = nameMatch.get(name);
             arr.push(line);
-        }else{
+        } else {
             nameMatch.set(name, [line]);
         }
     }
     return nameMatch;
 }
+console.log(getNameMatch());
