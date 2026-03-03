@@ -19,6 +19,15 @@ function processCommand(command) {
         case 'show':
             showAllTodos();
             break;
+        case 'sort importance':
+            sortByImportance();
+            break;
+        case 'sort user':
+            sortByUser();
+            break;
+        case 'sort date':
+            sortByDate();
+            break;
         case 'important':
             console.log(important());
             break;
@@ -90,4 +99,51 @@ function important() {
         }
     }
     return result;
+}
+
+function parseTodo(line) {
+    return {
+        text: line,
+        exclamations: (line.match(/!/g) || []).length,
+        user: (line.match(/TODO\s+([^;]+);/) || [])[1]?.trim(),
+        date: (() => {
+            const m = line.match(/TODO\s+[^;]+;\s*([^;]+);/);
+            return m && /^\d{4}-\d{2}-\d{2}$/.test(m[1].trim()) ? m[1].trim() : null;
+        })()
+    };
+}
+
+function sortByImportance() {
+    const todos = show().map(parseTodo);
+    todos.sort((a, b) => b.exclamations - a.exclamations);
+    todos.forEach(t => console.log(t.text));
+}
+
+function sortByUser() {
+    const todos = show().map(parseTodo);
+    const withUser = {}, without = [];
+    
+    todos.forEach(t => {
+        if (t.user) (withUser[t.user] = withUser[t.user] || []).push(t);
+        else without.push(t);
+    });
+    
+    Object.keys(withUser).sort().forEach(user => {
+        console.log(`\n${user}:`);
+        withUser[user].forEach(t => console.log(t.text));
+    });
+    
+    if (without.length) {
+        console.log('\nБез пользователя:');
+        without.forEach(t => console.log(t.text));
+    }
+}
+
+function sortByDate() {
+    const todos = show().map(parseTodo);
+    const withDate = todos.filter(t => t.date).sort((a, b) => b.date.localeCompare(a.date));
+    const withoutDate = todos.filter(t => !t.date);
+    
+    withDate.forEach(t => console.log(`[${t.date}] ${t.text}`));
+    withoutDate.forEach(t => console.log(t.text));
 }
