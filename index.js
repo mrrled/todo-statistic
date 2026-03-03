@@ -23,3 +23,16 @@ function processCommand(command) {
 }
 
 // TODO you can do it!
+function show() {
+    const files = getFiles().map(file => file.split('\n'));
+    const result = [];
+    for (const file of files) {
+        for (const line of file) {
+            const indexStart = line.indexOf('// TODO ');
+            if (indexStart !== -1) {
+                result.push(line.substring(indexStart));
+            }
+        }
+    }
+    return result;
+}
