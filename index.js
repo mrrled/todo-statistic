@@ -11,10 +11,14 @@ function getFiles() {
     return filePaths.map(path => readFile(path));
 }
 
-function processCommand(command) {
-    const args = command.split(' ').slice(1).join(' ');
-    const com = command.split(' ')[0];
-    switch (com) {
+function processCommand(line) {
+    const args = line.split(' ').slice(1).join(' ');
+    let command = line.split(' ')[0];
+    if (command === 'sort')
+    {
+        command = line;
+    }
+    switch (command) {
         case 'exit':
             process.exit(0);
             break;
@@ -115,16 +119,20 @@ function important() {
     return result;
 }
 
-function parseTodo(line) {
-    return {
+function parseTodo(line)
+{
+    let result ={
         text: line,
         exclamations: (line.match(/!/g) || []).length,
-        user: (line.match(/TODO\s+([^;]+);/) || [])[1]?.trim(),
-        date: (() => {
-            const m = line.match(/TODO\s+[^;]+;\s*([^;]+);/);
-            return m && /^\d{4}-\d{2}-\d{2}$/.test(m[1].trim()) ? m[1].trim() : null;
-        })()
-    };
+        user: undefined,
+        date: undefined};
+    let parts = line.split(';');
+    if (parts.length !== 3) {
+        return result;
+    }
+    result.user = parts[0].split(' ').slice(2).join(' ').toLowerCase();
+    result.date = parts[1];
+    return result;
 }
 
 function sortByImportance() {
@@ -168,7 +176,7 @@ function sortByDate() {
     const todos = show().map(parseTodo);
     const withDate = [];
     const withoutDate = [];
-    
+
     for (const t of todos) {
         if (t.date) {
             withDate.push(t);
@@ -178,7 +186,7 @@ function sortByDate() {
     }
     
     withDate.sort((a, b) => b.date.localeCompare(a.date));
-    
+
     for (const t of withDate) {
         console.log(`[${t.date}] ${t.text}`);
     }
@@ -186,7 +194,6 @@ function sortByDate() {
         console.log(t.text);
     }
 }
-
 function user(username) {
     const lowerUsername = username.toLowerCase();
     const nameMatch = getNameMatch();
@@ -194,18 +201,21 @@ function user(username) {
     if (ans === undefined) {
         return 'Not found comments for this username';
     }
-    return ans;
+    const result = [];
+    for(const todo of nameMatch.get(lowerUsername)) {
+        result.push(todo.text);
+    }
+    return result;
 }
 
 function getNameMatch() {
-    const lines = show();
+    const lines = show().map(parseTodo);
     const nameMatch = new Map();
     for (const line of lines) {
-        let parts = line.split(';');
-        if (parts.length !== 3) {
+        if (line.user === undefined) {
             continue;
         }
-        const name = parts[0].split(' ').slice(2).join(' ').toLowerCase();
+        const name = line.user;
         if (nameMatch.has(name)) {
             const arr = nameMatch.get(name);
             arr.push(line);
