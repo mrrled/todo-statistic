@@ -125,4 +125,3 @@ function getNameMatch() {
     }
     return nameMatch;
 }
-console.log(getNameMatch());
